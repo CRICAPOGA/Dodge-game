@@ -28,9 +28,12 @@ velocidad_jugador = 5
 tamaño_enemigo = 50
 velocidad_enemigo_inicial = 5
 
+# Fuente
+fuente_score = pygame.font.Font(None, 36)
+
 # Función para dibujar al jugador
 def dibujar_jugador(jugador_x, jugador_y):
-    pygame.draw.circle(PANTALLA, AZUL, (jugador_x + tamaño_jugador // 2, jugador_y + tamaño_jugador //2), tamaño_jugador //2)
+    pygame.draw.circle(PANTALLA, AZUL, (jugador_x + tamaño_jugador // 2, jugador_y + tamaño_jugador // 2), tamaño_jugador // 2)
 
 # Función para dibujar enemigos
 def dibujar_enemigo(enemigo_x, enemigo_y):
@@ -100,6 +103,31 @@ def mostrar_instrucciones():
                 if evento.key == pygame.K_ESCAPE:
                     return
 
+# Mostrar pantalla de Game Over
+def mostrar_game_over(score):
+    while True:
+        PANTALLA.fill(NEGRO)
+        fuente = pygame.font.Font(None, 74)
+        texto_game_over = fuente.render("Game Over", True, ROJO)
+        PANTALLA.blit(texto_game_over, (ANCHO // 2 - texto_game_over.get_width() // 2, ALTO // 4))
+
+        fuente_score = pygame.font.Font(None, 50)
+        texto_score = fuente_score.render(f"Score: {score}", True, BLANCO)
+        PANTALLA.blit(texto_score, (ANCHO // 2 - texto_score.get_width() // 2, ALTO // 2))
+
+        texto_reiniciar = fuente_score.render("Presiona R para reiniciar", True, BLANCO)
+        PANTALLA.blit(texto_reiniciar, (ANCHO // 2 - texto_reiniciar.get_width() // 2, ALTO // 2 + 60))
+
+        pygame.display.flip()
+
+        for evento in pygame.event.get():
+            if evento.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
+            if evento.type == pygame.KEYDOWN:
+                if evento.key == pygame.K_r:
+                    return
+
 # Juego principal
 def juego():
     jugador_x = ANCHO // 2 - tamaño_jugador // 2
@@ -107,6 +135,7 @@ def juego():
     enemigo_x = random.randint(0, ANCHO - tamaño_enemigo)
     enemigo_y = -tamaño_enemigo
     velocidad_enemigo = velocidad_enemigo_inicial
+    score = 0
 
     corriendo = True
     while corriendo:
@@ -132,6 +161,7 @@ def juego():
             enemigo_y = -tamaño_enemigo
             enemigo_x = random.randint(0, ANCHO - tamaño_enemigo)
             velocidad_enemigo += 0.5  # Aumentar velocidad de los enemigos
+            score += 1  # Aumentar score cuando el enemigo pasa al fondo
 
         # Verificar colisión
         if verificar_colision(jugador_x, jugador_y, enemigo_x, enemigo_y):
@@ -141,14 +171,21 @@ def juego():
         PANTALLA.fill(NEGRO)
         dibujar_jugador(jugador_x, jugador_y)
         dibujar_enemigo(enemigo_x, enemigo_y)
-        pygame.display.flip()
 
+        # Mostrar el score
+        texto_score = fuente_score.render(f"Score: {score}", True, BLANCO)
+        PANTALLA.blit(texto_score, (10, 10))
+
+        pygame.display.flip()
         reloj.tick(FPS)
+
+    mostrar_game_over(score)
 
 # Ejecutar juego
 def main():
-    mostrar_menu()
-    juego()
+    while True:
+        mostrar_menu()
+        juego()
 
 if __name__ == "__main__":
     main()
